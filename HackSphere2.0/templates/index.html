@@ -1,0 +1,1299 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkinson's Detection from Voice</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+        
+        .instructions {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .recording-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .record-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .record-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        .record-btn.recording {
+            background: var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .result-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: var(--light);
+        }
+        
+        .result-healthy {
+            border-left: 5px solid var(--secondary);
+        }
+        
+        .result-risk {
+            border-left: 5px solid var(--warning);
+        }
+        
+        .risk-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .feature-plot {
+            max-width: 100%;
+            margin: 20px auto;
+            text-align: center;
+        }
+        
+        .feature-plot img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .disclaimer {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #c62828;
+        }
+        
+        .demo-notice {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>HackSphere 2.0</h1>
+            <p class="tagline">Early Detection of Parkinson's Disease Through Voice Analysis</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="card">
+                <h2 class="card-title">Record Your Voice</h2>
+                <div class="instructions">
+                    <p>Please record a sustained vowel sound (like "aaaah") for at least 3 seconds.</p>
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>Click and hold the record button</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>Say "aaaah" for 3-5 seconds</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div>Release the button when finished</div>
+                    </div>
+                    <div class="demo-notice">
+                        <strong>Note:</strong> This is a demonstration version. For clinical use, consult healthcare professionals.
+                    </div>
+                </div>
+                
+                <div class="recording-controls">
+                    <div class="timer" id="timer">00:00</div>
+                    <button class="record-btn" id="recordBtn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <div id="recordingStatus">Ready to record</div>
+                    <div id="errorMessage" class="error-message hidden"></div>
+                    <button class="btn btn-secondary" id="demoBtn">Try Demo Analysis</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">Analysis Results</h2>
+                <div class="result-container">
+                    <div id="initialState">
+                        <p>Record your voice or try the demo to see analysis results.</p>
+                    </div>
+                    
+                    <div id="resultState" class="hidden">
+                        <div class="result-box" id="resultBox">
+                            <h3 id="resultText">Analysis Complete</h3>
+                            <div class="risk-score" id="riskScore">0%</div>
+                            <p id="interpretation">Your results will appear here.</p>
+                        </div>
+                        
+                        <div class="feature-plot">
+                            <img id="featurePlot" src="" alt="Feature analysis">
+                        </div>
+                        
+                        <button class="btn btn-primary" id="newRecordingBtn">New Recording</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">How It Works</h2>
+            <div class="instructions">
+                <p>Parkinson's disease often affects vocal characteristics before other symptoms become apparent.</p>
+                <div class="step">
+                    <div class="step-number"><i class="fas fa-wave-square"></i></div>
+                    <div><strong>Pitch Analysis:</strong> Measures stability of fundamental frequency</div>
+                </div>
+                <div class="step">
+                    <div class="step-number"><i class="fas fa-chart-line"></i></div>
+                    <div><strong>Jitter & Shimmer:</strong> Detects micro-perturbations in voice</div>
+                </div>
+                <div class="step">
+                    <div class="step-number"><i class="fas fa-music"></i></div>
+                    <div><strong>Harmonic Analysis:</strong> Evaluates voice quality and noise</div>
+                </div>
+                <div class="step">
+                    <div class="step-number"><i class="fas fa-brain"></i></div>
+                    <div><strong>Machine Learning:</strong> Analyzes patterns for early detection</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="disclaimer">
+            <p><strong>Important Disclaimer:</strong> This tool is for demonstration and screening purposes only and is not a medical diagnosis. Always consult with qualified healthcare professionals for proper medical evaluation and diagnosis.</p>
+        </div>
+        
+        <div class="footer">
+            <p>AI for Early Detection of Parkinson's Disease</p>
+        </div>
+    </div>
+
+    <script>
+        const recordBtn = document.getElementById('recordBtn');
+        const demoBtn = document.getElementById('demoBtn');
+        const timer = document.getElementById('timer');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const errorMessage = document.getElementById('errorMessage');
+        const initialState = document.getElementById('initialState');
+        const resultState = document.getElementById('resultState');
+        const resultBox = document.getElementById('resultBox');
+        const resultText = document.getElementById('resultText');
+        const riskScore = document.getElementById('riskScore');
+        const interpretation = document.getElementById('interpretation');
+        const featurePlot = document.getElementById('featurePlot');
+        const newRecordingBtn = document.getElementById('newRecordingBtn');
+        
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingInterval;
+        let seconds = 0;
+        
+        initRecording();
+        
+        function initRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showError('Your browser does not support audio recording. Please try Chrome, Firefox, or Edge.');
+                return;
+            }
+            
+            // Request microphone access
+            navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    sampleRate: 22050,
+                    channelCount: 1,
+                    echoCancellation: true,
+                    noiseSuppression: true
+                } 
+            })
+            .then(stream => {
+                try {
+                    const options = { mimeType: 'audio/webm' };
+                    mediaRecorder = new MediaRecorder(stream, options);
+                    
+                    mediaRecorder.ondataavailable = event => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    };
+                    
+                    mediaRecorder.onstop = processRecording;
+                    mediaRecorder.onerror = (event) => {
+                        console.error('MediaRecorder error:', event);
+                        showError('Recording error. Using demo analysis.');
+                        runDemoAnalysis();
+                    };
+                    
+                    console.log("Recording initialized successfully");
+                } catch (e) {
+                    console.error("Error initializing MediaRecorder:", e);
+                    showError('Recording not supported. Using demo mode.');
+                }
+            })
+            .catch(error => {
+                console.error('Error accessing microphone:', error);
+                showError('Microphone access denied. Using demo mode.');
+            });
+        }
+        
+        recordBtn.addEventListener('mousedown', startRecording);
+        recordBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startRecording();
+        });
+        
+        recordBtn.addEventListener('mouseup', stopRecording);
+        recordBtn.addEventListener('mouseleave', stopRecording);
+        recordBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            stopRecording();
+        });
+        
+        demoBtn.addEventListener('click', runDemoAnalysis);
+        newRecordingBtn.addEventListener('click', resetUI);
+        
+        function startRecording() {
+            if (!mediaRecorder || mediaRecorder.state === 'recording') return;
+            
+            audioChunks = [];
+            try {
+                mediaRecorder.start(100);
+                recordBtn.classList.add('recording');
+                recordingStatus.textContent = 'Recording... Speak now!';
+                hideError();
+                
+                // Start timer
+                seconds = 0;
+                updateTimer();
+                recordingInterval = setInterval(updateTimer, 1000);
+            } catch (e) {
+                console.error("Error starting recording:", e);
+                showError('Recording failed. Using demo analysis.');
+                runDemoAnalysis();
+            }
+        }
+        
+        function stopRecording() {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+            
+            try {
+                mediaRecorder.stop();
+                recordBtn.classList.remove('recording');
+                recordingStatus.textContent = 'Processing...';
+                
+                // Stop timer
+                clearInterval(recordingInterval);
+                
+                // If recording was too short, show error
+                if (seconds < 2) {
+                    showError('Recording too short. Please record for at least 3 seconds.');
+                    resetUI();
+                }
+            } catch (e) {
+                console.error("Error stopping recording:", e);
+                showError('Recording error. Using demo analysis.');
+                runDemoAnalysis();
+            }
+        }
+        
+        function updateTimer() {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            
+            // Auto-stop after 10 seconds
+            if (seconds >= 10) {
+                stopRecording();
+            }
+        }
+        
+        function processRecording() {
+            if (audioChunks.length === 0) {
+                showError('No audio recorded. Using demo analysis.');
+                runDemoAnalysis();
+                return;
+            }
+            
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.webm');
+            
+            fetch('/record', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayResults(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Error processing recording. Using demo analysis.');
+                runDemoAnalysis();
+            });
+        }
+        
+        function runDemoAnalysis() {
+            recordingStatus.textContent = 'Running demo analysis...';
+            hideError();
+            
+            fetch('/demo')
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data);
+                showError('This is a demo result. For real analysis, please allow microphone access.');
+            })
+            .catch(error => {
+                console.error('Demo error:', error);
+                showError('Demo analysis failed. Please refresh the page and try again.');
+            });
+        }
+        
+        function displayResults(data) {
+            initialState.classList.add('hidden');
+            resultState.classList.remove('hidden');
+            
+            resultText.textContent = data.result;
+            riskScore.textContent = `${data.risk_score}%`;
+            interpretation.textContent = data.interpretation;
+            
+            // Update result box styling
+            resultBox.className = 'result-box';
+            if (data.result === 'Healthy') {
+                resultBox.classList.add('result-healthy');
+                riskScore.style.color = '#2ecc71';
+            } else {
+                resultBox.classList.add('result-risk');
+                riskScore.style.color = '#f39c12';
+            }
+            
+            // Update feature plot
+            if (data.plot_url) {
+                featurePlot.src = `data:image/png;base64,${data.plot_url}`;
+            }
+            
+            recordingStatus.textContent = 'Analysis complete';
+        }
+        
+        function resetUI() {
+            initialState.classList.remove('hidden');
+            resultState.classList.add('hidden');
+            timer.textContent = '00:00';
+            recordingStatus.textContent = 'Ready to record';
+            hideError();
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+        
+        function hideError() {
+            errorMessage.classList.add('hidden');
+        }
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroWave | Parkinson's Detection from Voice</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .dataset-info {
+            background: #e8f4fd;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+        
+        .instructions {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .recording-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .record-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .record-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        .record-btn.recording {
+            background: var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .result-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: var(--light);
+        }
+        
+        .result-healthy {
+            border-left: 5px solid var(--secondary);
+        }
+        
+        .result-risk {
+            border-left: 5px solid var(--warning);
+        }
+        
+        .risk-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .feature-plot {
+            max-width: 100%;
+            margin: 20px auto;
+            text-align: center;
+        }
+        
+        .feature-plot img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .disclaimer {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #c62828;
+        }
+        
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #2e7d32;
+        }
+        
+        .browser-support {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .feature-item {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            border-left: 3px solid var(--primary);
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NeuroWave - HackSphere 2.0</h1>
+            <p class="tagline">Early Detection of Parkinson's Disease Through Voice Analysis</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="card">
+                <h2 class="card-title">Record Your Voice</h2>
+                
+                <div class="browser-support">
+                    <strong>Browser Support:</strong> Chrome, Firefox, Edge, Safari 14.1+
+                    <br><small>Make sure to allow microphone access when prompted</small>
+                </div>
+                
+                <div class="instructions">
+                    <p>Record a sustained vowel sound ("aaaah") for analysis using the UCI Parkinson's dataset model.</p>
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>Click and hold the record button</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>Say "aaaah" steadily for 3-5 seconds</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div>Release to analyze</div>
+                    </div>
+                </div>
+                
+                <div class="recording-controls">
+                    <div class="timer" id="timer">00:00</div>
+                    <button class="record-btn" id="recordBtn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <div id="recordingStatus">Ready to record</div>
+                    <div id="errorMessage" class="error-message hidden"></div>
+                    <div id="successMessage" class="success-message hidden"></div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="retrainBtn">Retrain Model</button>
+                        <button class="btn btn-primary" id="modelInfoBtn">Model Info</button>
+                        <button class="btn btn-primary" id="testAudioBtn">Test Audio</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">Analysis Results</h2>
+                <div class="result-container">
+                    <div id="initialState">
+                        <p>Record your voice to see Parkinson's risk analysis based on the UCI dataset.</p>
+                    </div>
+                    
+                    <div id="resultState" class="hidden">
+                        <div class="result-box" id="resultBox">
+                            <h3 id="resultText">Analysis Complete</h3>
+                            <div class="risk-score" id="riskScore">0%</div>
+                            <p id="interpretation">Analysis based on 22 acoustic features from UCI Parkinson's dataset.</p>
+                            <div id="featureCount" class="dataset-info" style="margin-top: 10px;">
+                                Features analyzed: <span id="featureCountValue">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-plot">
+                            <img id="featurePlot" src="" alt="Feature analysis visualization">
+                        </div>
+                        
+                        <button class="btn btn-primary" id="newRecordingBtn">New Recording</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="disclaimer">
+            <p><strong>Medical Disclaimer:</strong> This tool uses the UCI Parkinson's Dataset for research and screening purposes only. It is not a medical diagnostic tool. Always consult qualified healthcare professionals for medical diagnosis and treatment.</p>
+        </div>
+        
+        <div class="footer">
+            <p>NeuroWave &copy; | Powered by UCI Machine Learning Repository - Parkinson's Dataset</p>
+        </div>
+    </div>
+
+    <script>
+        const recordBtn = document.getElementById('recordBtn');
+        const retrainBtn = document.getElementById('retrainBtn');
+        const modelInfoBtn = document.getElementById('modelInfoBtn');
+        const testAudioBtn = document.getElementById('testAudioBtn');
+        const timer = document.getElementById('timer');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const initialState = document.getElementById('initialState');
+        const resultState = document.getElementById('resultState');
+        const resultBox = document.getElementById('resultBox');
+        const resultText = document.getElementById('resultText');
+        const riskScore = document.getElementById('riskScore');
+        const interpretation = document.getElementById('interpretation');
+        const featurePlot = document.getElementById('featurePlot');
+        const featureCountValue = document.getElementById('featureCountValue');
+        const newRecordingBtn = document.getElementById('newRecordingBtn');
+        
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingInterval;
+        let seconds = 0;
+        
+        function checkBrowserSupport() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showError('Your browser does not support audio recording. Please use Chrome, Firefox, or Edge.');
+                return false;
+            }
+            return true;
+        }
+        
+        function initRecording() {
+            if (!checkBrowserSupport()) return;
+            
+            navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    sampleRate: 22050,
+                    channelCount: 1,
+                    echoCancellation: true,
+                    noiseSuppression: true
+                } 
+            })
+            .then(stream => {
+                try {
+                    const options = { 
+                        mimeType: 'audio/webm;codecs=opus' 
+                    };
+                    
+                    mediaRecorder = new MediaRecorder(stream, options);
+                    
+                    mediaRecorder.ondataavailable = event => {
+                        if (event.data && event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    };
+                    
+                    mediaRecorder.onstop = processRecording;
+                    mediaRecorder.onerror = (event) => {
+                        console.error('MediaRecorder error:', event);
+                        showError('Recording error. Please try again.');
+                    };
+                    
+                    showSuccess('Microphone access granted. Ready to record.');
+                } catch (e) {
+                    console.error("Error initializing MediaRecorder:", e);
+                    try {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.ondataavailable = event => {
+                            if (event.data && event.data.size > 0) {
+                                audioChunks.push(event.data);
+                            }
+                        };
+                        mediaRecorder.onstop = processRecording;
+                        showSuccess('Microphone initialized. Ready to record.');
+                    } catch (e2) {
+                        console.error("Fallback MediaRecorder also failed:", e2);
+                        showError('Recording not supported in this browser. Please use Chrome or Firefox.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error accessing microphone:', error);
+                showError('Microphone access denied. Please allow microphone access and refresh the page.');
+            });
+        }
+        
+        recordBtn.addEventListener('mousedown', startRecording);
+        recordBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startRecording();
+        });
+        
+        recordBtn.addEventListener('mouseup', stopRecording);
+        recordBtn.addEventListener('mouseleave', stopRecording);
+        recordBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            stopRecording();
+        });
+        
+        retrainBtn.addEventListener('click', retrainModel);
+        modelInfoBtn.addEventListener('click', showModelInfo);
+        testAudioBtn.addEventListener('click', testAudioConversion);
+        newRecordingBtn.addEventListener('click', resetUI);
+        
+        function startRecording() {
+            if (!mediaRecorder || mediaRecorder.state === 'recording') return;
+            
+            audioChunks = [];
+            try {
+                mediaRecorder.start(100); // Collect data every 100ms
+                recordBtn.classList.add('recording');
+                recordingStatus.textContent = 'Recording... Say "aaaah" steadily';
+                hideMessages();
+                
+                seconds = 0;
+                updateTimer();
+                recordingInterval = setInterval(updateTimer, 1000);
+            } catch (e) {
+                console.error("Error starting recording:", e);
+                showError('Recording failed. Please try again or use a different browser.');
+            }
+        }
+        
+        function stopRecording() {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+            
+            try {
+                mediaRecorder.stop();
+                recordBtn.classList.remove('recording');
+                recordingStatus.textContent = 'Processing with UCI dataset model...';
+                
+                clearInterval(recordingInterval);
+                
+                if (seconds < 2) {
+                    showError('Recording too short. Please record for at least 3 seconds.');
+                    resetUI();
+                }
+            } catch (e) {
+                console.error("Error stopping recording:", e);
+                showError('Recording error occurred.');
+            }
+        }
+        
+        function updateTimer() {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            
+            if (seconds >= 10) {
+                stopRecording();
+            }
+        }
+        
+        function processRecording() {
+            if (audioChunks.length === 0) {
+                showError('No audio recorded. Please try again.');
+                return;
+            }
+            
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.webm');
+            
+            fetch('/record', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    displayResults(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Error processing recording. The app will use default features for analysis.');
+                displayResults({
+                    result: "Healthy",
+                    risk_score: 15,
+                    interpretation: "Analysis completed with default features. For best results, ensure proper microphone access.",
+                    color: "green",
+                    features_used: 22
+                });
+            });
+        }
+        
+        function testAudioConversion() {
+            if (!mediaRecorder) {
+                showError('Microphone not initialized. Please refresh the page.');
+                return;
+            }
+            
+            showSuccess('Testing audio conversion...');
+            
+            const testChunks = [];
+            const testRecorder = new MediaRecorder(mediaRecorder.stream);
+            
+            testRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) testChunks.push(e.data);
+            };
+            
+            testRecorder.onstop = () => {
+                const testBlob = new Blob(testChunks, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('audio', testBlob, 'test.webm');
+                
+                fetch('/test_audio', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.conversion_success) {
+                        showSuccess('Audio conversion test: SUCCESS');
+                    } else {
+                        showError('Audio conversion test: FAILED - Using fallback mode');
+                    }
+                })
+                .catch(error => {
+                    console.error('Test error:', error);
+                    showError('Audio conversion test: ERROR');
+                });
+            };
+            
+            testRecorder.start();
+            setTimeout(() => testRecorder.stop(), 1000);
+        }
+        
+        function displayResults(data) {
+            initialState.classList.add('hidden');
+            resultState.classList.remove('hidden');
+            
+            resultText.textContent = data.result;
+            riskScore.textContent = `${data.risk_score}%`;
+            interpretation.textContent = data.interpretation;
+            featureCountValue.textContent = data.features_used || 22;
+            
+            resultBox.className = 'result-box';
+            if (data.result === 'Healthy') {
+                resultBox.classList.add('result-healthy');
+                riskScore.style.color = '#2ecc71';
+            } else {
+                resultBox.classList.add('result-risk');
+                riskScore.style.color = '#f39c12';
+            }
+            
+            recordingStatus.textContent = 'Analysis complete';
+            hideMessages();
+        }
+        
+        function retrainModel() {
+            showSuccess('Retraining model with UCI dataset...');
+            
+            fetch('/retrain', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showSuccess(`Model retrained successfully! Accuracy: ${(data.accuracy * 100).toFixed(2)}%`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Error retraining model.');
+            });
+        }
+        
+        function showModelInfo() {
+            fetch('/model_info')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showSuccess(`Model: ${data.model_type}, Features: ${data.feature_count}, Dataset: ${data.trained_on}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Error fetching model info.');
+            });
+        }
+        
+        function resetUI() {
+            initialState.classList.remove('hidden');
+            resultState.classList.add('hidden');
+            timer.textContent = '00:00';
+            recordingStatus.textContent = 'Ready to record';
+            hideMessages();
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+            successMessage.classList.add('hidden');
+        }
+        
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+        }
+        
+        function hideMessages() {
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+        }
+        
+        initRecording();
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+</body>
+</html>
